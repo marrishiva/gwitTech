@@ -15,7 +15,7 @@ class SlackMessage {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
-                "Authorization": "Bearer" + " " + "xoxb-1428272868914-1475018786358-S4icr0fbP9SGQDM5AJ8pUYrk",
+                "Authorization": "Bearer" + " " + "xoxb-1428272868914-1475018786358-9kpzgwMkHEcSh3tF0TXwKSl9",
             },
             body: JSON.stringify(options)
         }, (error, response, body) => {

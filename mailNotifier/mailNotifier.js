@@ -21,7 +21,6 @@ class MailNotiifer {
     }
 
     imapListners() {
-
         this.imap.once('ready', () => {
             let connection = {
                 user: 'marrishiva72@gmail.com',
