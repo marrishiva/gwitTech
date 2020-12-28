@@ -3,7 +3,9 @@ let Imap = require('imap');
 const notifier = require('mail-notifier');
 const fs = require("fs");
 const path = require("path");
-const JiraIssueCreator = require("../jira/jiraIssueCreate")
+const JiraIssueCreator = require("../jira/jiraIssueCreate");
+const PdfGenrator = require("./pdfGenereator");
+let pdfMerger = require("./pdfMerger");
 class MailNotiifer {
     constructor() {
         /**create Imp Object */
@@ -54,15 +56,12 @@ class MailNotiifer {
                 for (let i = 0; i < mail.attachments.length; i++) {
                     saveFiles.push(this.saveUploadFiles(Buffer.from(mail.attachments[i].content), new Date().getTime() + path.extname(mail.attachments[i].generatedFileName)));
                 }
-                Promise.all(saveFiles).then(fileNames => {
-                    try {
-                        this.jiraIssueCreator.createJiraIssue(mail.subject, mail.text, fileNames)
-                    } catch (e) {
-                        console.log(e);
-                    }
+                Promise.all(saveFiles).then(async fileNames => {
+                    let filename = await pdfMerger(fileNames);
+                    this.jiraIssueCreator.createJiraIssue(mail.subject, mail.text, filename)
                 })
             } else {
-                this.jiraIssueCreator.createJiraIssue(mail.subject, mail.text, null)
+                //  this.jiraIssueCreator.createJiraIssue(mail.subject, mail.text, null)
             }
 
         } catch (e) {
@@ -70,12 +69,12 @@ class MailNotiifer {
         }
     }
 
-    saveUploadFiles(file, fileName) {
-        console.log(fileName);
+    async saveUploadFiles(file, fileName) {
         return new Promise((resolve, reject) => {
-            fs.writeFile("uploads/" + fileName, file, (err) => {
+            fs.writeFile("uploads/" + fileName, file, async (err) => {
                 if (!err) {
-                    resolve("uploads/" + fileName)
+                    let filePath = await PdfGenrator(fileName);
+                    resolve(filePath);
                 }
                 else {
                     reject(err)
